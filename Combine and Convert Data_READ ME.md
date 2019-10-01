@@ -18,4 +18,4 @@ Number of lines of code:	757
 
 Other Credits:	Some segments of filereading code adapted from a script written by Michiel de Kock.
 
-Download and Support:	For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
+Download and Support:	The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
