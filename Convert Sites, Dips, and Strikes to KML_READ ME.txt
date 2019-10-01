@@ -4,16 +4,17 @@ Filename: Convert-Excel-Sites-and-Dips+Strikes-to-KML.crl.python2.py
 
 Author: Casey Luskin
 
-Summary: This text-based Python script reads an Excel file containing all site locations in latitude and longitude and their associated dip and dip direction, plus a table of all bedding orientation measurements taken and used in this study, and converts them to a Keyhole Markup Language (.kml) file which can be opened as a Google Earth overlay displaying all sites, and bedding measurements used in this study. Arrow icons used for bedding measurement locations are oriented to within 15° of actual dip direction allowing easy visual identification of bedding dip on map. 
+Summary: This text-based Python script reads an Excel file containing all site locations in latitude and longitude and their bedding orientation, plus a table of all bedding orientation measurements taken and used in this study, and converts them to a Keyhole Markup Language (.kml) file. This .kml file can be opened as a Google Earth overlay displaying all sites, and bedding measurements used in this study. Arrow icons used for bedding measurement locations are oriented to within 15° of actual dip direction allowing for easy visual identification of bedding dip-direction on map.
 
 Intended Scope of use: This program has been used extensively in this study to determine the bedding corrections for paleomagnetic sites sampled in this study. 
 
-Requirements: Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules.
+Requirements: Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules, as well as xlrd. 
 
-Input: Excel File Site-Dip-and-Dip-Directions.xlsx containing a worksheet “Sites” with all sites in this study listed by names, location (latitude and longitude), bedding corrections, and notes, and a worksheet “Measurements” containing all bedding measurements taken in this study, and also measurements derived from prior studies of areas sampled in this study, as well as their locations (latitude and longitude). 
+Input: Excel file “Site-Dip-and-Dip-Directions.xlsx” containing a worksheet “Sites” with all sites in this study listed by name, location (latitude and longitude), bedding orientation, and notes, plus a second worksheet “Measurements” containing all bedding measurements taken in this study and measurements derived from prior studies of areas sampled in this study, as well as their locations (latitude and longitude). 
 
-Output: KML file Sites-Dips-Strikes.kml which can be opened in Google Earth showing an overlay of sites and bedding measurements. 
+Output: KML file “Sites-Dips-Strikes.kml” which can be opened in Google Earth showing an overlay of sites and bedding measurements.
+Number of lines of code:	304
 
-Number of lines of code: 304
+Other Credits: --
 
-Other Credits: Download and Support:	The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
+Download and Support: The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
