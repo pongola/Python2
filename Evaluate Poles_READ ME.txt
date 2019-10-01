@@ -14,11 +14,10 @@ The user can specify time periods from which poles should be outputted. Multiple
 
 Intended Scope of use: This program was written for use in generating Appendix 1 of this study.
 
-Requirements: Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules, as well as numpy, matplotlib, Basemap, Circles, and Shapely. Note that the Circles module has been specially modified by this author to properly wrap distorted circles across edges of a Robinson Projection. 
+Requirements: Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules, as well as numpy, matplotlib, Basemap, Circles, Shapely, and xlrd. Note that the Circles module has been specially modified by this author to properly wrap distorted circles across edges of a Robinson Projection. 
 
 Input: An Excel spreadsheet named “Prior Work--Quickbook.xlsx”, which contains data from prior paleomagnetic studies, including paleopole location + K and A95, mean direction + k and α95, and Q criteria scores. The user specifies the minimum angular distance (in degrees) that must separate poles (+ α95s) in order to be considered “different” for Q7, as well as the minimum time (in Ma) that must separate poles in order to be considered an overprint for Q7. The user also specifies from which time periods (in Ma) pole data should be outputted.  
-
-Output: Output is generated in four formats containing poles from the time period specified by the user: 
+Output:	Output is generated in four formats containing poles from the time period specified by the user: 
 
 (1) an Excel spreadsheet containing three tabs: (a) all prior poles within the time period, color-coded according to whether they are verified, key, or nonverified poles, (b) only verified poles within the specified time period, and (c) only key poles within the specified time period. 
 
@@ -32,4 +31,4 @@ Number of lines of code: 1,465
 
 Other Credits: Code for drawing properly distorted 95% confidence ellipses on Robinson Projections in Basemap Circle code adapted from https://github.com/urschrei/Circles/blob/master/README.md, DOI 10.5281/zenodo.10084
 
-Download and Support: The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
+Download and Support: The latest version of this script and the modified Circles library can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
