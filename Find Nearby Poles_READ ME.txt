@@ -1,0 +1,25 @@
+Name:	Find Nearby Poles
+
+Filename:	Findnearbypoles.crl.python2.py
+
+Author:	Casey Luskin
+
+Summary:	This text-based Python script is an early iteration of Evaluate Poles (section II.3) in which the user can find prior poles on the Kaapvaal Craton that are near a certain specified pole.
+
+First, the user enters the latitude and longitude of a pole, as well as the pole name, and then the user enters the angular distance to search for nearby poles. The program then evaluates all pole locations in an Excel spreadsheet, “Prior Work--Quickbook.xlsx” and compares the angular distance between the user-specified pole and each pole in the workbook. If the distance is less than the user-specified distance then a pole is deemed “nearby”.
+
+Data for each nearby pole is both outputted to the screen and also written in GPlates Markup Language (GPML) as a .gpml file (Qin et al., 2012). The resultant .gpml files can then be opened in GPlates (Boyden et al., 2011).
+
+Intended Scope of use: 	This program was used in this study to quickly determine what other poles on the Kaapvaal Craton were near paleopoles indicated by the results of this study. 
+
+Requirements:	Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules. 
+
+Input:	The user inputs the pole name, latitude, and longitude, and the angular distance within which to find “nearby” poles.
+
+Output:	The program outputs data about nearby poles to the screen and also writes them as .gpml files. 
+
+Number of lines of code:	381
+
+Other Credits:	--
+
+Download and Support:	The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
