@@ -4,9 +4,11 @@ Filename: Fix-SQUID-Data.crl.python2_v2.py
 
 Author: Casey Luskin
 
-Summary: This text-based Python script fixes RAPID SQUID data that was measured with a “Z” parameter incorrectly outputted with an inverse sign on the 2G SQUID magnetometer at UJ. This led to a wrong sign on the inclination in core coordinates, which led to geographic and tilt-corrected coordinates also being incorrect. 
+Summary: This text-based Python script fixes RAPID SQUID data that was measured with a “Z” parameter incorrectly set with an inverse sign on the 2G SQUID magnetometer at UJ. This led to a wrong sign on the inclination in core coordinates, which led to geographic and tilt-corrected coordinates also being incorrect. 
 
-Intended Scope of use: This script was used in this study and by others in the UJ paleomag lab to correct incorrectly outputted data. 
+This script corrects the sign on the core coordinates and rerotates the geographic and tilt-corrected coordinates appropriately.
+
+Intended Scope of use: This script was used in this study and by others in the UJ Paleomagnetism lab to fix incorrectly outputted data.
 
 Requirements: Python 2.7 installed on Windows or Mac with standard built-in Python libraries/modules. 
 
