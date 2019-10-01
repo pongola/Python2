@@ -27,4 +27,4 @@ Number of lines of code:	1,465
 
 Other Credits:	Code for drawing properly distorted 95% confidence ellipses on Robinson Projections in Basemap Circle code adapted from https://github.com/urschrei/Circles/blob/master/README.md, DOI 10.5281/zenodo.10084
 
-Download and Support:	For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
+Download and Support: The latest version of this script can be downloaded from https://github.com/pongola/Python2. For support or assistance, please contact the author Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com.
