@@ -1,3 +1,3 @@
 The file Circles.py was originally written by Stephan Hügel, urschrei@gmail.com, available at: https://github.com/urschrei/Circles/blob/master/README.md
 
-This version here is identical except it contains a modified function "Circle_wrap" that is based upon the original "circle" function.
+This version here is identical except it contains a modified function "Circle_wrap" that is based upon the original "circle" function. The circle_wrap function allows ellipses to wrap around opposite sides of a Robinson Projection. It also fixes fill of circles at high latitudes, although some bugs with high latitude circles still remain. 
