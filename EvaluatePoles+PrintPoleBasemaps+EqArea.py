@@ -5,6 +5,8 @@
 # This script evaluates poles for Q criteria (including finding similar younger poles) and prints basemaps with pole diagrams and equal area plots.
 # The input Excel file must be named: "Prior Work--Quickbook.xlsx".
 # Circle code adapted from https://github.com/urschrei/Circles/blob/master/README.md
+# 
+# Script written by Casey Luskin.
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ####################### IMPORTS ############################
