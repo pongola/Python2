@@ -5,7 +5,8 @@
 # This script fixes SQUID data that was measured with a "Z" parameter with inverse sign. This led to a wrong sign on the core inclination, which led to geographic and tilt coordinates that were incorrect.  
 # Script written by Casey Luskin using a kernel of code by Michiel de Kock for reading and writing SQUID data, and an Excel spreadsheet created by Michiel de Kock with proper formulas, "Core to strat coordinates_fixed.xlsx".
 # For the complete mathematics on spherical coordinate transformations, see Cox and Hart's textbook, Plate Tectonics: How it Works (1986), pp. 226-228.
-# 
+#
+# Script written by Casey Luskin.
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ##########################################################
