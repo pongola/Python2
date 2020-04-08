@@ -7,6 +7,7 @@
 # and the value of the current data point are averaged, and the datapoint is replaced by the average. It also then calculates
 # the first and second derivatives of the smoothed susceptibility data via simple slope calculations.
 #
+# Script written by Casey Luskin.
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ##############################################
