@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#############################################################################
 # This script combines automatically detects whether Spinner .jr6 and .txt and/or Squid .sam and sample files from a site are present
 # and converts and/or combines any files that are present into Rapid Squid file format for use in PaleoMagX/Paleomag 3.1b3.
 # This script also sorts all combined steps in the proper order.
@@ -7,6 +8,9 @@
   # Note: This program uses site dec of 0.0 and uses data that forces all sample declinations to zero. See flowchart for details. 
 
 # Script mostly written by Casey Luskin based upon an original core written by Michiel de Kock
+# For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
+#
+#############################################################################
 
 import os
 import re
