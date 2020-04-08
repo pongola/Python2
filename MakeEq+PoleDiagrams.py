@@ -8,6 +8,8 @@
 #
 # The input Excel file must be named: "paleomagdata.xlsx".
 # Circle code adapted from https://github.com/urschrei/Circles/blob/master/README.md
+#
+# Script written by Casey Luskin.
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ####################### IMPORTS ############################
