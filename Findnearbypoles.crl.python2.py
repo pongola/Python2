@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
-# This script converts Excel Pole Data to Gplates VGPs.
-# The input Excel file must be named: "Prior Work--Quickbook.xlsx".
-# It creates both poles and antipoles for each entry, and puts them in different subfolders of the root directory that the script is in.
-# Pole .gmpl files go into Script Pathway Root\Python VGP Gpmls
-# Antipole .gmpl files go into Script Pathway Root\Python Python AntiPole Gpmls
+#
+###################################################################
+#
+# This text-based Python script was an early iteration of what became Evaluate Poles (Section II.3) in which the user can find prior poles on the Kaapvaal Craton that are near a user-specified pole location. 
+#
+# First, the user enters the latitude and longitude of a pole, as well as the pole name, and then the user enters the angular distance to search for nearby poles.
+# The program then evaluates all pole locations in an Excel spreadsheet, “Prior Work--Quickbook.xlsx,” and compares the angular distance between the user-specified pole
+# and each pole in the workbook. If the distance is less than the user-specified distance then a pole is deemed “nearby.”
+#
+# Data for each nearby pole is both outputted to the screen and encoded and saved in a GPlates Markup Language .gpml file (Qin et al., 2012).
+# The resultant .gpml files can then be opened in a GPlates project (Boyden et al., 2011).
+#
+# For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
+#
+###################################################################
 
 import sys
 import os
