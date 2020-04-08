@@ -1,5 +1,17 @@
 # -*- coding: utf-8 -*-
+# 
+#############################################
+# 
 # This script converts Excel ALL SITE AND DIPS-STRIKES to KML. It does the whole excel file. 
+# This text-based Python script reads an Excel file “Site-Dip-and-Dip-Directions.xlsx” containing all sampling site locations in latitude and longitude and their bedding orientation,
+# plus a table of all bedding orientation measurements taken and used in this study, and converts them to a Keyhole Markup Language (.kml) file. This .kml file can be opened as a Google
+# Earth overlay displaying all sites and bedding measurements used in this study. Arrow icons used for bedding measurement locations are oriented to within 15° of actual dip direction,
+# allowing for easy visual identification of bedding dip-direction on map. Mouse hovering over a site or measurement location in Google Earth leads to a popup window that contains
+# information from the Excel spreadsheet about the site or measurement.
+#
+# For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
+#
+#############################################
 
 linebreak = chr(10)
 leftsinglequote = u'\u2018'
