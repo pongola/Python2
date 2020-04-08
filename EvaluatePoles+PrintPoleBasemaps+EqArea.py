@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 ####################### INTRODUCTION #######################
+#
 # This script evaluates poles for Q criteria (including finding similar younger poles) and prints basemaps with pole diagrams and equal area plots.
 # The input Excel file must be named: "Prior Work--Quickbook.xlsx".
 # Circle code adapted from https://github.com/urschrei/Circles/blob/master/README.md
-
+# For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
+#
 ####################### IMPORTS ############################
 import sys
 import os
@@ -20,17 +22,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import numpy as np
 
-from Circles.circles import circle
-from Circles.circles import circle_wrap
+#from Circles.circles import circle
+#from Circles.circles import circle_wrap
 # Note that circles is found in C:\Python27\Lib\site-packages\Circles
 # Note that I modified circle to create circle_wrap
 from shapely.geometry import Polygon, Point
 from descartes import PolygonPatch
 
-verifiedqmin = 0 #Change this to make verified poles require higher vqq
+verifiedqmin = 3 #Change this to make verified poles require higher vqq
 
 ####################### CONSTANTS #######################
-excelfilename = "MesoarcheanQuickbook.xlsx"
+excelfilename = "Prior Work--Quickbook.xlsx"
 finalpolesexcelfilename = "Prior Work Verified.xls"
 geologicaltimescale = [ [1,"Quarternary",0,2.58],[2,"Neogene",2.58,23.03],
                         [3,"Paleogene",23.03,66],[4,"Cretaceous",66,145],
@@ -55,7 +57,7 @@ A95_word_upper = "A%s%s" % (subscript9,subscript5)
 
 cols = [["Unit (Component)",40],["Age (Ma)",15],["Dec",6],["Inc",6],["k",5],[a95_word_lower,5],
         ["Plat",6],["Plon",6],["dp",5],["dm",5],["K",5],[A95_word_upper,5],
-        ["1",2],["2",2],["3",2],["4",2],["5",2],["6",2],["7",2],["Q",2],["Paleomag Reference\n(Age Reference)",40],["Younger/Similar Poles",40],["Pole Type",3]]
+        ["1",2],["2",2],["3",2],["4",2],["5",2],["6",2],["7",2],["Q",2],["Paleomag Reference [Age Reference]",40],["Younger/Similar Poles",40],["Pole Type",3]]
 
 eqcircletick_length_dict = {10:8, 15:8, 20:8, 30:8, 40:8, 45:10, 50:8, 60:8, 70:8, 75:8, 80:8, 90:12,
                             100:8, 105:8, 110:8, 120:8, 130:8, 135:10, 140:8, 150:8, 160:8, 165:8, 170:8, 180:12,
@@ -161,7 +163,228 @@ specialcolordict = {"ALICEBLUE":"#F0F8FF","ANTIQUEWHITE":"#FAEBD7","ANTIQUEWHITE
                     "VIOLETRED2":"#EE3A8C","VIOLETRED3":"#CD3278","VIOLETRED4":"#8B2252","WARMGREY":"#808069","WHEAT":"#F5DEB3","WHEAT1":"#FFE7BA","WHEAT2":"#EED8AE","WHEAT3":"#CDBA96","WHEAT4":"#8B7E66","WHITE":"#FFFFFF",
                     "WHITESMOKE":"#F5F5F5","YELLOW1":"#FFFF00","YELLOW2":"#EEEE00","YELLOW3":"#CDCD00","YELLOW4":"#8B8B00","RED":"#FF0000","LIME":"#00FF00","YELLOW":"#FFFF00","CYAN":"#00FFFF"}
 
-cellcolordict = {"A":"white","V":"rose","K":"pale_blue"}
+cellcolordict = {"A":"white","V":"pale_blue","K":"lime"}
+
+####################### CIRCLES #######################
+
+class CourseException(Exception):
+    """ Simple error class """
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+def _gccalc(lon, lat, azimuth, maxdist=None):
+    """
+    Original javascript on http://williams.best.vwh.net/gccalc.htm
+    Translated into python by Thomas Lecocq
+    This function is a black box, because trigonometry is difficult
+    
+    """
+    glat1 = lat * np.pi / 180.
+    glon1 = lon * np.pi / 180.
+    s = maxdist / 1.852
+    faz = azimuth * np.pi / 180.
+ 
+    EPS = 0.00000000005
+    if ((np.abs(np.cos(glat1)) < EPS) and not (np.abs(np.sin(faz)) < EPS)):
+        raise CourseException("Only North-South courses are meaningful")
+
+    a = 6378.13 / 1.852
+    f= 1 / 298.257223563
+    r = 1 - f
+    tu = r * np.tan(glat1)
+    sf = np.sin(faz)
+    cf = np.cos(faz)
+    if (cf == 0):
+        b = 0.
+    else:
+        b = 2. * np.arctan2 (tu, cf)
+
+    cu = 1. / np.sqrt(1 + tu * tu)
+    su = tu * cu
+    sa = cu * sf
+    c2a = 1 - sa * sa
+    x = 1. + np.sqrt(1. + c2a * (1. / (r * r) - 1.))
+    x = (x - 2.) / x
+    c = 1. - x
+    c = (x * x / 4. + 1.) / c
+    d = (0.375 * x * x - 1.) * x
+    tu = s / (r * a * c)
+    y = tu
+    c = y + 1
+    while (np.abs (y - c) > EPS):
+        sy = np.sin(y)
+        cy = np.cos(y)
+        cz = np.cos(b + y)
+        e = 2. * cz * cz - 1.
+        c = y
+        x = e * cy
+        y = e + e - 1.
+        y = (((sy * sy * 4. - 3.) * y * cz * d / 6. + x) *
+            d / 4. - cz) * sy * d + tu
+
+    b = cu * cy * cf - su * sy
+    c = r * np.sqrt(sa * sa + b * b)
+    d = su * cy + cu * sy * cf
+    glat2 = (np.arctan2(d, c) + np.pi) % (2*np.pi) - np.pi
+    c = cu * cy - su * sy * cf
+    x = np.arctan2(sy * sf, c)
+    c = ((-3. * c2a + 4.) * f + 4.) * c2a * f / 16.
+    d = ((e * cy * c + cz) * sy * c + y) * sa
+    glon2 = ((glon1 + x - (1. - c) * d * f + np.pi) % (2*np.pi)) - np.pi
+
+    baz = (np.arctan2(sa, b) + np.pi) % (2 * np.pi)
+
+    glon2 *= 180./np.pi
+    glat2 *= 180./np.pi
+    baz *= 180./np.pi
+    return (glon2, glat2, baz)
+
+def circle(m, centerlon, centerlat, radius, *args, **kwargs):
+    """
+    Return lon, lat tuples of a "circle" which matches the chosen Basemap projection
+    Takes the following arguments:
+    m = basemap instance
+    centerlon = originating lon
+    centrelat = originating lat
+    radius = radius
+
+    """
+
+    glon1 = centerlon
+    glat1 = centerlat
+    X = []
+    Y = []
+    for azimuth in range(0, 360):
+        glon2, glat2, baz = _gccalc(glon1, glat1, azimuth, radius)
+        X.append(glon2)
+        Y.append(glat2)
+    X.append(X[0])
+    Y.append(Y[0])
+
+    proj_x, proj_y = m(X,Y)
+    return zip(proj_x, proj_y)
+
+def circle_wrap(m, centerlon, centerlat, radius, midlon, boundary, lon_diff_angdist, toohighlat, *args, **kwargs):
+    # This modified function revised by Casey Luskin. The rest of this file written by the original author, Stephan Hügel, urschrei@gmail.com, as noted above.
+    """
+    Return lon, lat tuples of a "circle" for a Robinson Projection map
+    AND also returns lon, lat tuples of a "wrapped" circle on the other side of the Robinson Projection
+    Takes the following arguments:
+    m = basemap instance
+    centerlon = originating lon
+    centrelat = originating lat
+    radius = radius
+    midlon = middle longitude of the Robinson projection
+    lon_diff_angdist which is the longitudinal distance between the center of the circle and the nearest boundary of the map
+
+    """
+    glon1 = centerlon
+    glat1 = centerlat
+    X = []
+    Y = []
+    X_wrap = []
+    Y_wrap = []
+
+    centerlonpos = centerlon % 360
+    if centerlonpos == midlon:
+        pos = "middle"
+    elif (midlon < centerlonpos < (midlon+180)) or (0 < centerlonpos < ((midlon+180)%360)):
+        pos = "east"
+    else:
+        pos = "west"
+
+    for azimuth in range(0, 360):
+        glon2, glat2, baz = _gccalc(glon1, glat1, azimuth, radius)
+
+        p1_lon_rad = math.radians(centerlon)
+        p2_lon_rad = math.radians(glon2)
+        if math.fabs((math.degrees(p2_lon_rad) - math.degrees(p1_lon_rad))) > 180:
+            lon_diff = math.radians(360-math.fabs((math.degrees(p2_lon_rad) - math.degrees(p1_lon_rad))))
+        else:
+            lon_diff = math.radians(math.fabs((math.degrees(p2_lon_rad) - math.degrees(p1_lon_rad))))
+
+        center_glon2_lon_diff_degrees = math.degrees(lon_diff)
+        centerlat_rad = math.radians(centerlat)
+        glon2_lon_diff = math.cos(centerlat_rad) * center_glon2_lon_diff_degrees
+
+        if pos == "west" and (180 < azimuth <= 360):
+            if glon2_lon_diff > lon_diff_angdist:
+                X_wrap.append(glon2)
+                glon2 = -boundary
+                #print('WESTover %s' % glon2)
+                Y_wrap.append(glat2)
+        elif pos == "east" and (0 < azimuth <= 180):
+            if glon2_lon_diff > lon_diff_angdist:
+                X_wrap.append(glon2)
+                glon2 = boundary
+                #print('EASTover %s' % glon2)
+                Y_wrap.append(glat2)
+            
+        X.append(glon2)
+        Y.append(glat2)
+        #print(glon2, azimuth)
+    X.append(X[0])
+    Y.append(Y[0])
+
+    A = X_wrap
+    B = Y_wrap
+
+    if pos == "west":
+        sidelon = boundary
+    elif pos == "east":
+        sidelon = -boundary
+    for item in reversed(Y_wrap):
+        A.append(sidelon)
+        B.append(item)
+    
+    A.append(A[0])
+    B.append(B[0])
+
+    proj_x, proj_y = m(X,Y)
+    proj_a, proj_b = m(A,B)
+
+    if not toohighlat:
+        return [zip(proj_x, proj_y),zip(proj_a,proj_b)]
+    else:
+        northhem = Y[0] > 0
+        C = []
+        D = []
+        if northhem:
+            Y_max = max(Y)
+            B_max = max(B)
+            toplat = min([Y_max,B_max]) - 1
+            toplat_big = int(round(toplat * 10,0))
+            for latindex in range(toplat_big, 900):
+                C.append(boundary)
+                newlat = latindex / 10
+                D.append(newlat)
+            for latindex in reversed(range(toplat_big, 900)):
+                C.append(-boundary)
+                newlat = latindex / 10
+                D.append(newlat)
+        else:
+            Y_max = min(Y)
+            B_max = min(B)
+            toplat = max([Y_max,B_max]) + 1
+            toplat_big = int(round(toplat * 10,0))
+            for latindex in reversed(range(-900, toplat_big)):
+                C.append(-boundary)
+                newlat = latindex / 10
+                #print(newlat)
+                D.append(newlat)
+            for latindex in range(-900,toplat_big):
+                C.append(boundary)
+                #print(newlat)
+                newlat = latindex / 10
+                D.append(newlat)
+
+        proj_c, proj_d = m(C,D)
+        return [zip(proj_x, proj_y),zip(proj_a,proj_b),zip(proj_c,proj_d)]
+
+# Note that circles is found in C:\Python27\Lib\site-packages\Circles
+# Note that I modified circle to create circle_wrap
 
 ####################### PROCEDURES #######################
 
@@ -384,11 +607,6 @@ def loadallpoles(wb):
                 except:
                     agepostfix_decoded = agepostfix.encode('latin1')
 
-                upperage = re.sub("[^0-9]", "",agepostfix_decoded)
-                if upperage == "":
-                    upperage = "99999"
-                upperage_int = int(upperage)
-
                 agetext = ageprefix_decoded + age_str
                 if agepostfix_decoded != "":
                     agetext = agetext + agepostfix_decoded
@@ -399,7 +617,7 @@ def loadallpoles(wb):
                 ageref = rowitems[21]
                 ageref_decoded = ageref.encode('latin1')
                 
-                pmagref_text = "%s\n(%s)" % (pmagref_decoded,ageref_decoded)
+                pmagref_text = "%s [%s]" % (pmagref_decoded,ageref_decoded)
 
                 vvq1 = int(rowitems[22])
                 vvq2 = int(rowitems[23])
@@ -445,7 +663,7 @@ def loadallpoles(wb):
                 newpole = [ageprefix_decoded,age_int,agepostfix_decoded,unit_decoded,component_decoded,code_decoded,
                            polelat_num,polelon_num,antipolelat_num,antipolelon_num,polea95_num,polek_num,poledp_num,poledm_num,pole_radius,
                            paleolat_num,dec_num,inc_num,directiona95_num,directionk_num,pmagref_decoded,ageref_decoded,
-                           vvq1,vvq2,vvq3,vvq4,vvq5,vvq6,vvq7,vvqtotal,plateid,platerevision,writetext_list,"A",upperage_int]
+                           vvq1,vvq2,vvq3,vvq4,vvq5,vvq6,vvq7,vvqtotal,plateid,platerevision,writetext_list,"A"]
 
                 allpoles_list.append(newpole)
                 allpoles_list_sorted_age = sorted(allpoles_list, key = lambda item: item[1])
@@ -497,7 +715,7 @@ def processverifiedpoles():
                             spacer = " "
                         else:
                             spacer= ""
-                        youngerpoles_text = youngerpoles_text + ("%s%s%s, Age: %s Ma; " % (vpole[3], spacer, vpole[4], v_age) )
+                        youngerpoles_text = youngerpoles_text + ("%s%s%s, Age: %s Ma (%s); " % (vpole[3], spacer, vpole[4], v_age, vpole[20]) )
             else:
                 inlist = True
 
@@ -563,7 +781,7 @@ def processkeypoles():
                             spacer = " "
                         else:
                             spacer= ""
-                        youngerpoles_text = youngerpoles_text + ("%s%s%s, Age: %s Ma; " % (kpole[3], spacer, kpole[4], k_age) )
+                        youngerpoles_text = youngerpoles_text + ("%s%s%s, Age: %s Ma (%s); " % (kpole[3], spacer, kpole[4], k_age, kpole[20]) )
             else:
                 inlist = True
 
@@ -834,7 +1052,7 @@ def makensaveeqareaa95plot(directionlist,plotname,folderpath,periodname,shownumb
             ell_a95 = direction[3]
           
             reference = direction[7]
-            zplotorder = -int(round(ell_a95,0)) + 500
+            zplotorder = direction[10]
             refnum = dirnum + 1
 
             dec_rad = math.radians(dec)
@@ -867,10 +1085,6 @@ def makensaveeqareaa95plot(directionlist,plotname,folderpath,periodname,shownumb
                 lw = 1
                 ls = "-"
 
-            ls = "-" #This is to remove the hatching, etc.
-            lw=1
-            hatch = False
-                    
             if shownumbers:
                 ax.text(point_x+0.5, point_y-1, refnum,color=textcolor,va='center',ha='center',zorder=zplotorder+1,fontsize=label_fontsize,fontweight='normal')
 
@@ -1132,7 +1346,7 @@ def makensavepolea95plot(directionlist,plotname,folderpath,periodname,shownumber
                 if not normalpole:
                     continue
     
-            zplotorder = -int(round(a95,0)) + 500
+            zplotorder = direction[10]
             refnum = dirnum + 1
 
             if combinevk:
@@ -1149,10 +1363,6 @@ def makensavepolea95plot(directionlist,plotname,folderpath,periodname,shownumber
                 hatch = ""
                 lw = 1
                 ls = "-"
-
-            ls = "-" #This is to remove the hatching, etc.
-            lw=1
-            hatch = False
 
             p1_lon_rad = math.radians(lon)
             p2_lon_rad = math.radians(boundary)
@@ -1228,7 +1438,6 @@ def dotimeperiod(verifiedpoles_list,keypoles_list,periodname,endtime,starttime,s
     verifieddirectionlist = []
     for pole in verifiedpoles_list:
         age_int = pole[1]
-        upperage_int = pole[34]
         if starttime < age_int <= endtime:
             dec_num = pole[16]
             inc_num = pole[17]
@@ -1248,7 +1457,7 @@ def dotimeperiod(verifiedpoles_list,keypoles_list,periodname,endtime,starttime,s
                 spacer= ""                
             refinfo = ("%s: %s%s%s, Age: %s Ma" % (pmagref_decoded, unit_decoded, spacer, component_decoded, agetext) )
 
-            verifieddirectionlist.append([age_int,dec_num,inc_num,dira95,polelat,polelon,polea95,refinfo,True,poletype,upperage_int])
+            verifieddirectionlist.append([age_int,dec_num,inc_num,dira95,polelat,polelon,polea95,refinfo,True,poletype])
             if doantipoles:
                 antipolelat = pole[8]
                 antipolelon = pole[9]
@@ -1256,12 +1465,11 @@ def dotimeperiod(verifiedpoles_list,keypoles_list,periodname,endtime,starttime,s
                 antidec = (dec_num + 180) % 360
                 if antidec < 0:
                     antidec = antidec + 360
-                verifieddirectionlist.append([age_int,antidec,antiinc,dira95,antipolelat,antipolelon,polea95,refinfo,False,poletype,upperage_int])
+                verifieddirectionlist.append([age_int,antidec,antiinc,dira95,antipolelat,antipolelon,polea95,refinfo,False,poletype])
 
     keydirectionlist = []
     for pole in keypoles_list:
         age_int = pole[1]
-        upperage_int = pole[34]
         if starttime < age_int <= endtime:
             dec_num = pole[16]
             inc_num = pole[17]
@@ -1281,7 +1489,7 @@ def dotimeperiod(verifiedpoles_list,keypoles_list,periodname,endtime,starttime,s
                 spacer= ""                
             refinfo = ("%s: %s%s%s, Age: %s Ma" % (pmagref_decoded, unit_decoded, spacer, component_decoded, agetext) )
 
-            keydirectionlist.append([age_int,dec_num,inc_num,dira95,polelat,polelon,polea95,refinfo,True,poletype,upperage_int])
+            keydirectionlist.append([age_int,dec_num,inc_num,dira95,polelat,polelon,polea95,refinfo,True,poletype])
             if doantipoles:
                 antipolelat = pole[8]
                 antipolelon = pole[9]
@@ -1289,30 +1497,57 @@ def dotimeperiod(verifiedpoles_list,keypoles_list,periodname,endtime,starttime,s
                 antidec = (dec_num + 180) % 360
                 if antidec < 0:
                     antidec = antidec + 360
-                keydirectionlist.append([age_int,antidec,antiinc,dira95,antipolelat,antipolelon,polea95,refinfo,False,poletype,upperage_int])
+                keydirectionlist.append([age_int,antidec,antiinc,dira95,antipolelat,antipolelon,polea95,refinfo,False,poletype])
 
-    verifieddirectionlist_sorted_upperage = sorted(verifieddirectionlist, key = lambda item: item[10])
-    verifieddirectionlist_sorted_age = sorted(verifieddirectionlist_sorted_upperage, key = lambda item: item[0])
-    keydirectionlist_sorted_upperage = sorted(keydirectionlist, key = lambda item: item[10])
-    keydirectionlist_sorted_age = sorted(keydirectionlist_sorted_upperage, key = lambda item: item[0])
+    verifieddirectionlist_sorted_dira95 = sorted(verifieddirectionlist, reverse = True, key = lambda item: item[3])
+    verifieddirectionlist_dir_sorted_age = []
+    for zplotorder, item in enumerate(verifieddirectionlist_sorted_dira95):
+        newitem = item
+        newitem.append(zplotorder+50)
+        verifieddirectionlist_dir_sorted_age.append(newitem)
+    verifieddirectionlist_dir_sorted_age = sorted(verifieddirectionlist_dir_sorted_age, key = lambda item: item[0])
 
-##    makesavereferences(verifieddirectionlist_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
-##    makensaveeqareaplot(verifieddirectionlist_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
-##    makensaveeqareaa95plot(verifieddirectionlist_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False,doantipoles)
-##    makensavepoleplot(verifieddirectionlist_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
-##    makensavepolea95plot(verifieddirectionlist_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False,doantipoles)
+    verifieddirectionlist_sorted_polea95 = sorted(verifieddirectionlist, reverse = True, key = lambda item: item[6])
+    verifieddirectionlist_pole_sorted_age = []
+    for zplotorder, item in enumerate(verifieddirectionlist_sorted_polea95):
+        newitem = item
+        newitem.append(zplotorder+50)
+        verifieddirectionlist_pole_sorted_age.append(newitem)
+    verifieddirectionlist_pole_sorted_age = sorted(verifieddirectionlist_pole_sorted_age, key = lambda item: item[0])
+
+    keydirectionlist_sorted_dira95 = sorted(keydirectionlist, reverse = True, key = lambda item: item[3])
+    keydirectionlist_dir_sorted_age = []
+    for zplotorder, item in enumerate(keydirectionlist_sorted_dira95):
+        newitem = item
+        newitem.append(zplotorder+50)
+        keydirectionlist_dir_sorted_age.append(newitem)
+    keydirectionlist_dir_sorted_age = sorted(keydirectionlist_dir_sorted_age, key = lambda item: item[0])
+
+    keydirectionlist_sorted_polea95 = sorted(keydirectionlist, reverse = True, key = lambda item: item[6])
+    keydirectionlist_pole_sorted_age = []
+    for zplotorder, item in enumerate(keydirectionlist_sorted_polea95):
+        newitem = item
+        newitem.append(zplotorder+50)
+        keydirectionlist_pole_sorted_age.append(newitem)
+    keydirectionlist_pole_sorted_age = sorted(keydirectionlist_pole_sorted_age, key = lambda item: item[0])
+
+##    makesavereferences(verifieddirectionlist_dir_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
+##    makensaveeqareaplot(verifieddirectionlist_dir_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
+##    makensaveeqareaa95plot(verifieddirectionlist_dir_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False,doantipoles)
+##    makensavepoleplot(verifieddirectionlist_pole_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False)
+##    makensavepolea95plot(verifieddirectionlist_pole_sorted_age,"verifiedpoles",verifiedpath,periodname,shownumbers,False,doantipoles)
 ##
-##    makesavereferences(keydirectionlist_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
-##    makensaveeqareaplot(keydirectionlist_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
-##    makensaveeqareaa95plot(keydirectionlist_sorted_age,"keypoles",keypath,periodname,shownumbers,False,doantipoles)
-##    makensavepoleplot(keydirectionlist_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
-##    makensavepolea95plot(keydirectionlist_sorted_age,"keypoles",keypath,periodname,shownumbers,False,doantipoles)
+##    makesavereferences(keydirectionlist_dir_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
+##    makensaveeqareaplot(keydirectionlist_dir_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
+##    makensaveeqareaa95plot(keydirectionlist_dir_sorted_age,"keypoles",keypath,periodname,shownumbers,False,doantipoles)
+##    makensavepoleplot(keydirectionlist_pole_sorted_age,"keypoles",keypath,periodname,shownumbers,False)
+##    makensavepolea95plot(keydirectionlist_pole_sorted_age,"keypoles",keypath,periodname,shownumbers,False,doantipoles)
 
-    makesavereferences(verifieddirectionlist_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
-    makensaveeqareaplot(verifieddirectionlist_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
-    makensaveeqareaa95plot(verifieddirectionlist_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True,doantipoles)
-    makensavepoleplot(verifieddirectionlist_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
-    makensavepolea95plot(verifieddirectionlist_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True,doantipoles)
+    makesavereferences(verifieddirectionlist_dir_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
+    makensaveeqareaplot(verifieddirectionlist_dir_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
+    makensaveeqareaa95plot(verifieddirectionlist_dir_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True,doantipoles)
+    makensavepoleplot(verifieddirectionlist_pole_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True)
+    makensavepolea95plot(verifieddirectionlist_pole_sorted_age,"combinedpoles",combinedpath,periodname,shownumbers,True,doantipoles)
     return
 
 ####################### MAIN PROGRAM #######################
@@ -1441,25 +1676,22 @@ saveexcelpath_name = data_chartfolderpath + "\\" + finalpolesexcelfilename
 wb.save(saveexcelpath_name)
 print("Saving Excel File with Verified/Key Poles %s." % finalpolesexcelfilename)
 
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Eoarchean",4000,3600,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Paleoarchean",3600,3200,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Mesoarchean",3200,2800,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Neoarchean",2800,2500,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Eoarchean",4000,3600,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Paleoarchean",3600,3200,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Mesoarchean",3200,2800,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Neoarchean",2800,2500,True,False)
 
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Early Paleoproterozoic",2500,2050,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Late Paleoproterozoic",2050,1600,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Mesoproterozoic",1600,1000,True,False)
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Neoproterozoic",1000,541,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Early Paleoproterozoic",2500,2050,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Late Paleoproterozoic",2050,1600,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Mesoproterozoic",1600,1000,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Neoproterozoic",1000,541,True,False)
 
 ##dotimeperiod(verifiedpoles_list,keypoles_list,"Paleozoic",541,252,True,False)
 ##dotimeperiod(verifiedpoles_list,keypoles_list,"Mesozoic",252,66,True,False)
 ##dotimeperiod(verifiedpoles_list,keypoles_list,"Cenozoic",66,0,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"Phanerozoic",541,0,True,False)
 
-##dotimeperiod(verifiedpoles_list,keypoles_list,"All",4000,0,False,True)
-
-##dotimeperiod(verifiedpoles_list,keypoles_list,"Phanerozoic",541,0,True,False)
-
-dotimeperiod(verifiedpoles_list,keypoles_list,"Mesoarchean",3200,2800,True,False)
+dotimeperiod(verifiedpoles_list,keypoles_list,"All",4000,0,False,True)
 
 endchoice = raw_input('\n' + "----- Program complete. Goodbye! Please press enter to exit. -----")
 sys.exit()
