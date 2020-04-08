@@ -2,7 +2,9 @@
 #
 # PROGRAM FOR CALCULATING CUTOFF ANGLE FOR VGP DISPERSION STATISTICS. Written by Casey Luskin.
 # This text-based Python script reads a list of VGP latitude and longitude values and recursively calculates the cutoff angle
-# (for excluding certain VGPs from VGP dispersion calculations) following the method of Vandamme (1994).
+# (for excluding certain VGPs from VGP dispersion calculations) following the method of Vandamme (1994)
+# 
+# Script written by Casey Luskin..
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ###########################################
