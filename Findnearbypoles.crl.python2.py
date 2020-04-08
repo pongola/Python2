@@ -2,7 +2,7 @@
 #
 ###################################################################
 #
-# This text-based Python script was an early iteration of what became Evaluate Poles (Section II.3) in which the user can find prior poles on the Kaapvaal Craton that are near a user-specified pole location. 
+# This text-based Python script was an early iteration of what became the program "Evaluate Poles", in which the user can find prior poles on the Kaapvaal Craton that are near a user-specified pole location. 
 #
 # First, the user enters the latitude and longitude of a pole, as well as the pole name, and then the user enters the angular distance to search for nearby poles.
 # The program then evaluates all pole locations in an Excel spreadsheet, “Prior Work--Quickbook.xlsx,” and compares the angular distance between the user-specified pole
@@ -11,6 +11,7 @@
 # Data for each nearby pole is both outputted to the screen and encoded and saved in a GPlates Markup Language .gpml file (Qin et al., 2012).
 # The resultant .gpml files can then be opened in a GPlates project (Boyden et al., 2011).
 #
+# Script written by Casey Luskin.
 # For support, please contact Casey Luskin at caseyl@uj.ac.za or casey.luskin@gmail.com
 #
 ###################################################################
